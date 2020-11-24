@@ -7,9 +7,7 @@ import org.apache.commons.csv.CSVRecord;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by LaunchCode
@@ -43,6 +41,7 @@ public class JobData {
             }
         }
 
+        Collections.sort(values);
         return values;
     }
 
@@ -51,7 +50,16 @@ public class JobData {
         // load data, if not already loaded
         loadData();
 
-        return allJobs;
+        //return allJobs;
+
+        // not good practice to return a shallow (object references) of allJobs
+        // instead return a deep copy that has the actual values
+        ArrayList<HashMap<String, String>> allJobsDeepCopy = new ArrayList<>();
+        Iterator<HashMap<String, String>> iterator = allJobs.iterator();
+        while (iterator.hasNext()){
+            allJobsDeepCopy.add((HashMap<String, String>) iterator.next().clone());
+        }
+        return  allJobsDeepCopy;
     }
 
     /**
@@ -74,7 +82,7 @@ public class JobData {
 
         for (HashMap<String, String> row : allJobs) {
 
-            String aValue = row.get(column);
+            String aValue = row.get(column).toUpperCase();
 
             if (aValue.contains(value)) {
                 jobs.add(row);
@@ -125,4 +133,23 @@ public class JobData {
         }
     }
 
+    public static ArrayList<HashMap<String, String>> findByValue(String searchTerm){
+
+        // load data, if not already loaded
+        loadData();
+
+        ArrayList<HashMap<String, String>> jobs = new ArrayList<>();
+
+        for (HashMap<String, String> job : allJobs) {
+            for (Map.Entry row : job.entrySet()){
+                String aValue = row.getValue().toString().toUpperCase();
+                if (aValue.contains(searchTerm)){
+                    jobs.add(job);
+                    break;
+                }
+            }
+        }
+
+        return jobs;
+    }
 }
